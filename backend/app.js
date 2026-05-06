@@ -35,7 +35,7 @@ app.use('/api', emmisionRoutes);
 app.use('/api', llrRoutes);
 app.use('/api',dlRoutes);
 app.use('/api',dlRenwalRoutes);
-const PORT = process.env.PORT || 5000;
+
 
 app.get("/", (req, res) => {
   res.send("Backend is working 🚀");
