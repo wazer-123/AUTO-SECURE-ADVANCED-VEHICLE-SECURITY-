@@ -17,6 +17,7 @@
     "react-dropzone": "^14.3.5",
     "react-router-dom": "^7.1.1",
     "react-scripts": "5.0.1",
+    "serve": "^14.2.6",
     "uuidv4": "^6.2.13",
     "web-vitals": "^4.2.4"
   },
@@ -45,7 +46,6 @@
     ]
   },
   "main": "index.js",
-  "devDependencies": {},
   "author": "",
   "license": "ISC",
   "description": ""
