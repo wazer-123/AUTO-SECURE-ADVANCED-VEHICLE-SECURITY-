@@ -4,8 +4,15 @@ const router = express.Router();
 
 // Register
 router.post('/register', (req, res) => {
-  const { name, email, password, role } = req.body;
+  let { name, email, password, role } = req.body;
+
+  
+  if (!role) {
+    role = "Staff";  // or "user" (your choice)
+  }
+
   const sql = 'INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)';
+
   db.query(sql, [name, email, password, role], (err, result) => {
     if (err) return res.status(500).send(err);
     res.send('Registration successful');
