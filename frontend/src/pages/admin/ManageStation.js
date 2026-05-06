@@ -29,75 +29,121 @@ const ManageStation = () => {
     const namePattern = /^[a-zA-Z]+$/;
 
     // Fetch stations
-    const fetchStations = async () => {
-        try {
-            const response = await axios.get('http://localhost:5000/api/stations');
-            setStations(response.data);
-        } catch (error) {
-            console.error('Error fetching stations:', error);
-        }
-    };
+   const fetchStations = async () => {
+    try {
+        const response = await axios.get(
+            `${process.env.REACT_APP_API_URL}/api/stations`
+        );
 
-    useEffect(() => {
-        fetchStations();
-    }, []);
+        setStations(response.data);
 
-    // Handle dialog open/close
-    const handleOpen = (station = { id: '', name: '', phone: '' }) => {
-        setCurrentStation(station);
-        setIsEditing(Boolean(station.id));
-        setOpen(true);
-    };
+    } catch (error) {
+        console.error('Error fetching stations:', error);
+    }
+};
 
-    const handleClose = () => {
-        setOpen(false);
-        setCurrentStation({ id: '', name: '', phone: '' });
-    };
+useEffect(() => {
+    fetchStations();
+}, []);
 
-    // Add or update station
-    const handleSave = async () => {
-        const { id, name, phone } = currentStation;
+// Handle dialog open/close
+const handleOpen = (
+    station = { id: '', name: '', phone: '' }
+) => {
+    setCurrentStation(station);
+    setIsEditing(Boolean(station.id));
+    setOpen(true);
+};
 
-        try {
-            if (isEditing) {
-                await axios.put(`http://localhost:5000/api/stations/${id}`, { station_name: name, phone_number: phone });
-            } else {
-                if(currentStation.name===''){
-                    alert('name is required');
-                    return;
+const handleClose = () => {
+    setOpen(false);
+    setCurrentStation({
+        id: '',
+        name: '',
+        phone: ''
+    });
+};
+
+// Add or update station
+const handleSave = async () => {
+
+    const { id, name, phone } = currentStation;
+
+    try {
+
+        if (isEditing) {
+
+            await axios.put(
+                `${process.env.REACT_APP_API_URL}/api/stations/${id}`,
+                {
+                    station_name: name,
+                    phone_number: phone
                 }
-        if (!namePattern.test(currentStation.name)){
-            alert ('name can only contain letters and spaces.');
-            return;
-        }
-        if(currentStation.id===''){
-            alert('id is required');
-            return;
-        }
-        if(currentStation.phone===''){
-            alert('phone number is empty');
-            return;
-        }
-                await axios.post('http://localhost:5000/api/stations', { station_name: name, phone_number: phone });
-            }
-            fetchStations();
-            handleClose();
-        } catch (error) {
-            console.error('Error saving station:', error);
-        }
-    };
+            );
 
-    // Delete station
-    const handleDelete = async (id) => {
-        if (window.confirm('Are you sure you want to delete this station?')) {
-            try {
-                await axios.delete(`http://localhost:5000/api/stations/${id}`);
-                fetchStations();
-            } catch (error) {
-                console.error('Error deleting station:', error);
+        } else {
+
+            if (currentStation.name === '') {
+                alert('name is required');
+                return;
             }
+
+            if (!namePattern.test(currentStation.name)) {
+                alert(
+                    'name can only contain letters and spaces.'
+                );
+                return;
+            }
+
+            if (currentStation.id === '') {
+                alert('id is required');
+                return;
+            }
+
+            if (currentStation.phone === '') {
+                alert('phone number is empty');
+                return;
+            }
+
+            await axios.post(
+                `${process.env.REACT_APP_API_URL}/api/stations`,
+                {
+                    station_name: name,
+                    phone_number: phone
+                }
+            );
         }
-    };
+
+        fetchStations();
+        handleClose();
+
+    } catch (error) {
+        console.error('Error saving station:', error);
+    }
+};
+
+// Delete station
+const handleDelete = async (id) => {
+
+    if (
+        window.confirm(
+            'Are you sure you want to delete this station?'
+        )
+    ) {
+
+        try {
+
+            await axios.delete(
+                `${process.env.REACT_APP_API_URL}/api/stations/${id}`
+            );
+
+            fetchStations();
+
+        } catch (error) {
+            console.error('Error deleting station:', error);
+        }
+    }
+};
 
     return (
         <>

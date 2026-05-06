@@ -47,9 +47,15 @@ const AddFIR = () => {
         e.preventDefault();
 
         try {
-            const response = await axios.post('http://localhost:5000/api/firs', formData);
-            console.log(response.data);
-            alert('FIR submitted successfully!');
+
+    const response = await axios.post(
+        `${process.env.REACT_APP_API_URL}/api/firs`,
+        formData
+    );
+
+    console.log(response.data);
+
+    alert('FIR submitted successfully!');
             
             // Reset form after successful submission
             const nextFIRNumber = getNextFIRNumber();

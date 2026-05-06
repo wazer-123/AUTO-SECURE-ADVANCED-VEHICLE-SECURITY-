@@ -21,27 +21,44 @@ function ForgotPassword() {
   };
 
   const sendOTP = async (e) => {
-    e.preventDefault();
-    try {
-      await axios.post('http://localhost:5000/api/otp/forgot-password', { email });
-      alert('OTP sent to your email');
-      setStep(2);
-    } catch (error) {
-      alert('Error sending OTP');
-    }
-  };
+  e.preventDefault();
 
-  const resetPassword = async (e) => {
-    e.preventDefault();
-    try {
-      const otpCode = otp.join('');
-      await axios.post('http://localhost:5000/api/otp/reset-password', { email, otp: otpCode, newPassword });
-      navigate('/');
-      alert('Password reset successful');
-    } catch (error) {
-      alert('Invalid OTP');
-    }
-  };
+  try {
+    await axios.post(
+      `${process.env.REACT_APP_API_URL}/api/otp/forgot-password`,
+      { email }
+    );
+
+    alert('OTP sent to your email');
+    setStep(2);
+
+  } catch (error) {
+    alert('Error sending OTP');
+  }
+};
+
+const resetPassword = async (e) => {
+  e.preventDefault();
+
+  try {
+    const otpCode = otp.join('');
+
+    await axios.post(
+      `${process.env.REACT_APP_API_URL}/api/otp/reset-password`,
+      {
+        email,
+        otp: otpCode,
+        newPassword
+      }
+    );
+
+    navigate('/');
+    alert('Password reset successful');
+
+  } catch (error) {
+    alert('Invalid OTP');
+  }
+};
 
   return (
     <div className="container-fluid p-0">

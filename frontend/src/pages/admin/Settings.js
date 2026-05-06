@@ -21,11 +21,15 @@ const Settings = () => {
       return;
     }
 
-    try {
-      const response = await axios.post('http://localhost:5000/api/auth/change-password', {
-        currentPassword,
-        newPassword,
-      });
+   try {
+
+  const response = await axios.post(
+    `${process.env.REACT_APP_API_URL}/api/auth/change-password`,
+    {
+      currentPassword,
+      newPassword,
+    }
+  );
 
       if (response.data.success) {
         setSuccessMessage('Password changed successfully!');

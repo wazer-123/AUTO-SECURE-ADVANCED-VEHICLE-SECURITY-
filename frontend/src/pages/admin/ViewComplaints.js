@@ -21,69 +21,114 @@ const ViewComplaints = () => {
     }, []);
 
     const fetchComplaints = async () => {
-        try {
-            const response = await axios.get('http://localhost:5000/api/firs');
-            setComplaints(response.data);
-        } catch (error) {
-            console.error('Error fetching complaints:', error);
-        }
-    };
 
-    const fetchVehicles = async () => {
-        try {
-            const response = await axios.get('http://localhost:5000/api/vehicles');
-            setVehicles(response.data);
-        } catch (error) {
-            console.error('Error fetching vehicles:', error);
-        }
-    };
+    try {
 
-    const fetchUsers = async () => {
-        try {
-            const response = await axios.get('http://localhost:5000/api/auth/users');
-            setUsers(response.data);
-        } catch (error) {
-            console.error('Error fetching users:', error);
-        }
-    };
+        const response = await axios.get(
+            `${process.env.REACT_APP_API_URL}/api/firs`
+        );
 
-    const handleClose = () => {
-        setOpen(false);
-    };
+        setComplaints(response.data);
 
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData((prev) => ({ ...prev, [name]: value }));
-    };
+    } catch (error) {
+        console.error('Error fetching complaints:', error);
+    }
+};
 
-    const handleSubmit = async () => {
-        try {
-            if (isEditing) {
-                await axios.put(`http://localhost:5000/api/firs/${editComplaintId}`, formData);
-                fetchComplaints();
-                handleClose();
-            }
-        } catch (error) {
-            console.error('Error updating complaint:', error);
-        }
-    };
+const fetchVehicles = async () => {
 
-    const handleEdit = (fir_id) => {
-        const complaint = complaints.find((complaint) => complaint.fir_id === fir_id);
-        setFormData({ description: complaint.description, status: complaint.status });
-        setEditComplaintId(fir_id);
-        setIsEditing(true);
-        setOpen(true);
-    };
+    try {
 
-    const handleDelete = async (fir_id) => {
-        try {
-            await axios.delete(`http://localhost:5000/api/firs/${fir_id}`);
+        const response = await axios.get(
+            `${process.env.REACT_APP_API_URL}/api/vehicles`
+        );
+
+        setVehicles(response.data);
+
+    } catch (error) {
+        console.error('Error fetching vehicles:', error);
+    }
+};
+
+const fetchUsers = async () => {
+
+    try {
+
+        const response = await axios.get(
+            `${process.env.REACT_APP_API_URL}/api/auth/users`
+        );
+
+        setUsers(response.data);
+
+    } catch (error) {
+        console.error('Error fetching users:', error);
+    }
+};
+
+const handleClose = () => {
+    setOpen(false);
+};
+
+const handleChange = (e) => {
+
+    const { name, value } = e.target;
+
+    setFormData((prev) => ({
+        ...prev,
+        [name]: value
+    }));
+};
+
+const handleSubmit = async () => {
+
+    try {
+
+        if (isEditing) {
+
+            await axios.put(
+                `${process.env.REACT_APP_API_URL}/api/firs/${editComplaintId}`,
+                formData
+            );
+
             fetchComplaints();
-        } catch (error) {
-            console.error('Error deleting complaint:', error);
+            handleClose();
         }
-    };
+
+    } catch (error) {
+        console.error('Error updating complaint:', error);
+    }
+};
+
+const handleEdit = (fir_id) => {
+
+    const complaint = complaints.find(
+        (complaint) => complaint.fir_id === fir_id
+    );
+
+    setFormData({
+        description: complaint.description,
+        status: complaint.status
+    });
+
+    setEditComplaintId(fir_id);
+    setIsEditing(true);
+    setOpen(true);
+};
+
+const handleDelete = async (fir_id) => {
+
+    try {
+
+        await axios.delete(
+            `${process.env.REACT_APP_API_URL}/api/firs/${fir_id}`
+        );
+
+        fetchComplaints();
+
+    } catch (error) {
+        console.error('Error deleting complaint:', error);
+    }
+};
 
     const columns = [
         { field: 'fir_id', headerName: 'ID', width: 90 },

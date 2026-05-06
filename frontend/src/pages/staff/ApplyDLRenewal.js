@@ -35,135 +35,235 @@ function ApplyDLRenewal() {
         }
     }, [userId]);
 
-    const fetchExistingDL = () => {
-        setLoading(true);
-        axios
-            .get(`http://localhost:5000/api/dl/user/${userId}`)
-            .then((response) => {
-                if (response.data && response.data.length > 0) {
-                    const dl = response.data[0];
-                    
-                    // Fix: Add a check for expiry_date field if valid_to doesn't exist
-                    const validToField = dl.valid_to || dl.expiry_date;
-                    
-                    const dlWithCorrectDates = {
-                        ...dl,
-                        valid_to: validToField // Use the correct field for expiry date
-                    };
-                    
-                    setExistingDL(dlWithCorrectDates);
-                    
-                    // Check if the license is expired
-                    const today = new Date();
-                    const expiryDate = new Date(validToField);
-                    setIsExpired(today > expiryDate);
-                    
-                    // Prefill the form with existing DL information
-                    setFormData({
-                        dl_no: dl.dl_no || "",
-                        name: dl.user_name || "",
-                        phone_no: dl.phone_no || "",
-                        dob: dl.dob?.split('T')[0] || "",
-                        address: dl.address || "",
-                        valid_from: new Date().toISOString().split('T')[0], // Today's date
-                        valid_to: calculateValidTo(new Date()), // 5 years from today
-                        amount: "500" // Default renewal amount
-                    });
-                } else {
-                    setError("No existing driving license found. You need a valid DL before applying for renewal.");
-                }
-                setLoading(false);
-            })
-            .catch((error) => {
-                console.error("Error fetching DL information!", error);
-                setError("Failed to fetch your driving license information.");
-                setLoading(false);
-            });
-    };
+   const fetchExistingDL = () => {
 
-    const checkExistingRenewal = () => {
-        axios
-            .get(`http://localhost:5000/api/renewal/check/${userId}`)
-            .then((response) => {
-                if (response.data && response.data.hasRenewal) {
-                    // Only consider pending or under process renewals as "active"
-                    const status = response.data.renewal.status || "pending";
-                    if (status.toLowerCase() === "pending" || status.toLowerCase() === "in process") {
-                        setHasExistingRenewal(true);
-                        setRenewalStatus(status);
-                    } else {
-                        // For completed renewals (approved/rejected), allow new applications
-                        setHasExistingRenewal(false);
-                    }
-                }
-            })
-            .catch((error) => {
-                console.error("Error checking existing renewal!", error);
-            });
-    };
+    setLoading(true);
 
-    // Calculate valid_to date (5 years from valid_from)
-    const calculateValidTo = (fromDate) => {
-        const toDate = new Date(fromDate);
-        toDate.setFullYear(toDate.getFullYear() + 5);
-        return toDate.toISOString().split('T')[0];
-    };
+    axios
+        .get(
+            `${process.env.REACT_APP_API_URL}/api/dl/user/${userId}`
+        )
 
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData({
-            ...formData,
-            [name]: value
+        .then((response) => {
+
+            if (
+                response.data &&
+                response.data.length > 0
+            ) {
+
+                const dl = response.data[0];
+
+                // Fix expiry field
+                const validToField =
+                    dl.valid_to || dl.expiry_date;
+
+                const dlWithCorrectDates = {
+                    ...dl,
+                    valid_to: validToField
+                };
+
+                setExistingDL(dlWithCorrectDates);
+
+                // Check expiry
+                const today = new Date();
+
+                const expiryDate = new Date(
+                    validToField
+                );
+
+                setIsExpired(today > expiryDate);
+
+                // Prefill form
+                setFormData({
+                    dl_no: dl.dl_no || "",
+                    name: dl.user_name || "",
+                    phone_no: dl.phone_no || "",
+                    dob:
+                        dl.dob?.split('T')[0] || "",
+                    address: dl.address || "",
+
+                    valid_from: new Date()
+                        .toISOString()
+                        .split('T')[0],
+
+                    valid_to: calculateValidTo(
+                        new Date()
+                    ),
+
+                    amount: "500"
+                });
+
+            } else {
+
+                setError(
+                    "No existing driving license found. You need a valid DL before applying for renewal."
+                );
+            }
+
+            setLoading(false);
+
+        })
+
+        .catch((error) => {
+
+            console.error(
+                "Error fetching DL information!",
+                error
+            );
+
+            setError(
+                "Failed to fetch your driving license information."
+            );
+
+            setLoading(false);
         });
+};
 
-        // Automatically update valid_to when valid_from changes
-        if (name === "valid_from") {
-            const toDate = calculateValidTo(new Date(value));
-            setFormData(prevData => ({
-                ...prevData,
-                valid_to: toDate
-            }));
-        }
+const checkExistingRenewal = () => {
+
+    axios
+        .get(
+            `${process.env.REACT_APP_API_URL}/api/renewal/check/${userId}`
+        )
+
+        .then((response) => {
+
+            if (
+                response.data &&
+                response.data.hasRenewal
+            ) {
+
+                const status =
+                    response.data.renewal.status ||
+                    "pending";
+
+                if (
+                    status.toLowerCase() ===
+                        "pending" ||
+                    status.toLowerCase() ===
+                        "in process"
+                ) {
+
+                    setHasExistingRenewal(true);
+
+                    setRenewalStatus(status);
+
+                } else {
+
+                    setHasExistingRenewal(false);
+                }
+            }
+        })
+
+        .catch((error) => {
+
+            console.error(
+                "Error checking existing renewal!",
+                error
+            );
+        });
+};
+
+// Calculate valid_to date
+const calculateValidTo = (fromDate) => {
+
+    const toDate = new Date(fromDate);
+
+    toDate.setFullYear(
+        toDate.getFullYear() + 5
+    );
+
+    return toDate
+        .toISOString()
+        .split('T')[0];
+};
+
+const handleChange = (e) => {
+
+    const { name, value } = e.target;
+
+    setFormData({
+        ...formData,
+        [name]: value
+    });
+
+    // Update valid_to automatically
+    if (name === "valid_from") {
+
+        const toDate =
+            calculateValidTo(
+                new Date(value)
+            );
+
+        setFormData(prevData => ({
+            ...prevData,
+            valid_to: toDate
+        }));
+    }
+};
+
+const handleSubmit = (e) => {
+
+    e.preventDefault();
+
+    // Ensure DL number exists
+    if (!formData.dl_no) {
+
+        setError(
+            "A valid driving license number is required for renewal."
+        );
+
+        return;
+    }
+
+    // Prepare renewal data
+    const renewalData = {
+
+        dl_no: formData.dl_no,
+        name: formData.name,
+        phone_no: formData.phone_no,
+        dob: formData.dob,
+        address: formData.address,
+        valid_from: formData.valid_from,
+        valid_to: formData.valid_to,
+        amount: formData.amount,
+        user_id: userId
     };
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        
-        // Ensure we have a DL number
-        if (!formData.dl_no) {
-            setError("A valid driving license number is required for renewal.");
-            return;
-        }
+    // Submit renewal
+    axios
+        .post(
+            `${process.env.REACT_APP_API_URL}/api/renewal`,
+            renewalData
+        )
 
-        // Prepare data for submission
-        const renewalData = {
-            dl_no: formData.dl_no,
-            name: formData.name,
-            phone_no: formData.phone_no,
-            dob: formData.dob,
-            address: formData.address,
-            valid_from: formData.valid_from,
-            valid_to: formData.valid_to,
-            amount: formData.amount,
-            user_id: userId
-        };
+        .then((response) => {
 
-        // Submit renewal application
-        axios
-            .post("http://localhost:5000/api/renewal", renewalData)
-            .then((response) => {
-                alert("DL Renewal application submitted successfully!");
-                setHasExistingRenewal(true);
-                setRenewalStatus("pending");
+            alert(
+                "DL Renewal application submitted successfully!"
+            );
 
-                fetchExistingDL(); // Refresh DL information after renewal
-            })
-            .catch((error) => {
-                console.error("Error submitting renewal application!", error);
-                setError(error.response?.data?.error || "Error applying for DL renewal. Please try again.");
-            });
-    };
+            setHasExistingRenewal(true);
 
+            setRenewalStatus("pending");
+
+            fetchExistingDL();
+
+        })
+
+        .catch((error) => {
+
+            console.error(
+                "Error submitting renewal application!",
+                error
+            );
+
+            setError(
+                error.response?.data?.error ||
+                "Error applying for DL renewal. Please try again."
+            );
+        });
+};
     const getStatusBadge = () => {
         switch(renewalStatus.toLowerCase()) {
             case 'approved':

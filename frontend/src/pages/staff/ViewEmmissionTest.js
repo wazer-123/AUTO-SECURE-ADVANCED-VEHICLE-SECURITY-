@@ -12,18 +12,32 @@ function ViewEmmissionTest() {
     };
   
     useEffect(() => {
-       
-        console.log(userId);
-        if (userId) {
-            axios.get(`http://localhost:5000/api/emission_test/user/${userId}`)
-                .then(response => {
-                    setTests(response.data);
-                })
-                .catch(error => {
-                    console.error('There was an error fetching the emission tests!', error);
-                });
-        }
-    }, []);
+
+    console.log(userId);
+
+    if (userId) {
+
+        axios
+            .get(
+                `${process.env.REACT_APP_API_URL}/api/emission_test/user/${userId}`
+            )
+
+            .then((response) => {
+
+                setTests(response.data);
+
+            })
+
+            .catch((error) => {
+
+                console.error(
+                    'There was an error fetching the emission tests!',
+                    error
+                );
+            });
+    }
+
+}, []);
 
     return (
   <div>

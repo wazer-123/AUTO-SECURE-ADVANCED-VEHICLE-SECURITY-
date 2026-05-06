@@ -13,85 +13,171 @@ function ApplyLLR() {
   const navigate=useNavigate();
 
   const handleLogout = () => {
-    // Clear any session-related data
-    localStorage.removeItem('userToken'); // Remove stored tokens if any
-    navigate('/'); // Redirect to login page
-  };
 
-    useEffect(() => {
-        if (userId) {
-            // Fetch user details
-            axios
-                .get(`http://localhost:5000/api/auth/users/${userId}`)
-                .then((response) => {
-                    setName(response.data.name);
-                })
-                .catch((error) => {
-                    console.error("Error fetching user details!", error);
-                });
+    // Clear session data
+    localStorage.removeItem('userToken');
 
-            // Generate a short unique ID (first 8 characters of UUID)
-            const uniqueId = uuidv4().replace(/\D/g, '').substring(0, 8);
-            setLlrNumber(`KALLR${uniqueId}`);
-            
-            // Check if user already has an LLR application
-            axios
-                .get(`http://localhost:5000/api/llr/check/${userId}`)
-                .then((response) => {
-                    if (response.data.hasApplication) {
-                        setHasExistingApplication(true);
-                        setApplicationStatus(response.data.application.status);
-                        setLlrNumber(response.data.application.llr_no);
-                        setLlrIssueDate(response.data.application.LLR_issue_date?.split('T')[0] || '');
-                        
-                        // If status is approved, fetch DL information
-                        if (response.data.application.status.toLowerCase() === 'approved') {
-                            fetchDLNumber(userId);
-                        }
-                    }
-                })
-                .catch((error) => {
-                    console.error("Error checking existing application!", error);
-                });
-        }
-    }, [userId]);
+    // Redirect to login page
+    navigate('/');
+};
 
-    // Function to fetch DL number
-    const fetchDLNumber = (userId) => {
+useEffect(() => {
+
+    if (userId) {
+
+        // Fetch user details
         axios
-            .get(`http://localhost:5000/api/dl/user/${userId}`)
+            .get(
+                `${process.env.REACT_APP_API_URL}/api/auth/users/${userId}`
+            )
+
             .then((response) => {
-                if (response.data && response.data.length > 0) {
-                    setDlNumber(response.data[0].dl_no);
+
+                setName(response.data.name);
+
+            })
+
+            .catch((error) => {
+
+                console.error(
+                    "Error fetching user details!",
+                    error
+                );
+            });
+
+        // Generate unique LLR number
+        const uniqueId = uuidv4()
+            .replace(/\D/g, '')
+            .substring(0, 8);
+
+        setLlrNumber(`KALLR${uniqueId}`);
+
+        // Check existing LLR application
+        axios
+            .get(
+                `${process.env.REACT_APP_API_URL}/api/llr/check/${userId}`
+            )
+
+            .then((response) => {
+
+                if (
+                    response.data.hasApplication
+                ) {
+
+                    setHasExistingApplication(
+                        true
+                    );
+
+                    setApplicationStatus(
+                        response.data.application.status
+                    );
+
+                    setLlrNumber(
+                        response.data.application.llr_no
+                    );
+
+                    setLlrIssueDate(
+                        response.data.application.LLR_issue_date
+                            ?.split('T')[0] || ''
+                    );
+
+                    // If approved, fetch DL
+                    if (
+                        response.data.application.status.toLowerCase() ===
+                        'approved'
+                    ) {
+
+                        fetchDLNumber(userId);
+                    }
                 }
             })
+
             .catch((error) => {
-                console.error("Error fetching DL number!", error);
+
+                console.error(
+                    "Error checking existing application!",
+                    error
+                );
             });
+    }
+
+}, [userId]);
+
+// Fetch DL number
+const fetchDLNumber = (userId) => {
+
+    axios
+        .get(
+            `${process.env.REACT_APP_API_URL}/api/dl/user/${userId}`
+        )
+
+        .then((response) => {
+
+            if (
+                response.data &&
+                response.data.length > 0
+            ) {
+
+                setDlNumber(
+                    response.data[0].dl_no
+                );
+            }
+        })
+
+        .catch((error) => {
+
+            console.error(
+                "Error fetching DL number!",
+                error
+            );
+        });
+};
+
+const handleSubmit = (e) => {
+
+    e.preventDefault();
+
+    // Correct backend fields
+    const formData = {
+
+        llr_no: llrNumber,
+
+        LLR_issue_date:
+            llrIssueDate,
+
+        user_id: userId
     };
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        
-        // Corrected form data to match backend expected fields
-        const formData = { 
-            llr_no: llrNumber, 
-            LLR_issue_date: llrIssueDate, 
-            user_id: userId 
-        };
+    axios
+        .post(
+            `${process.env.REACT_APP_API_URL}/api/llr`,
+            formData
+        )
 
-        axios
-            .post("http://localhost:5000/api/llr", formData)
-            .then((response) => {
-                alert("LLR Applied Successfully!");
-                setHasExistingApplication(true);
-                setApplicationStatus("pending");
-            })
-            .catch((error) => {
-                console.error("Error submitting form!", error);
-                alert(error.response?.data?.error || "Error applying for LLR. Please try again.");
-            });
-    };
+        .then((response) => {
+
+            alert(
+                "LLR Applied Successfully!"
+            );
+
+            setHasExistingApplication(true);
+
+            setApplicationStatus("pending");
+        })
+
+        .catch((error) => {
+
+            console.error(
+                "Error submitting form!",
+                error
+            );
+
+            alert(
+                error.response?.data?.error ||
+                "Error applying for LLR. Please try again."
+            );
+        });
+};
 
     const getStatusBadge = () => {
         switch(applicationStatus.toLowerCase()) {

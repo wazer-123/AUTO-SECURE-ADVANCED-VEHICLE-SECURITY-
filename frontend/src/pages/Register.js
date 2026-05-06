@@ -10,15 +10,27 @@ function Register() {
   const navigate = useNavigate();
 
   const handleRegister = async (e) => {
-    e.preventDefault();
-    try {
-      await axios.post('http://localhost:5000/api/auth/register', { name, email, password, role });
-      navigate('/');
-      alert('Registration successful');
-    } catch (error) {
-      alert(`Registration failed: ${error.response ? error.response.data.message : error.message}`);
-    }
-  };
+  e.preventDefault();
+
+  try {
+    await axios.post(
+      `${process.env.REACT_APP_API_URL}/api/auth/register`,
+      { name, email, password, role }
+    );
+
+    navigate('/');
+    alert('Registration successful');
+
+  } catch (error) {
+    alert(
+      `Registration failed: ${
+        error.response
+          ? error.response.data.message
+          : error.message
+      }`
+    );
+  }
+};
 
   return (
     <div className="container-fluid p-0">

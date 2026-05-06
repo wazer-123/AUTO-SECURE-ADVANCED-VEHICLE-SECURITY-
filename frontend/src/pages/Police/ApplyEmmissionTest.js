@@ -21,9 +21,15 @@ const ApplyEmissionTest = () => {
         e.preventDefault();
 
         try {
-            const response = await axios.post('http://localhost:5000/api/emission_test', formData);
-            console.log(response.data);
-            alert('Emission test submitted successfully!');
+
+    const response = await axios.post(
+        `${process.env.REACT_APP_API_URL}/api/emission_test`,
+        formData
+    );
+
+    console.log(response.data);
+
+    alert('Emission test submitted successfully!');
             
             // Reset form after successful submission
             setFormData({

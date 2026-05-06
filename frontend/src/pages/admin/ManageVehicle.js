@@ -19,94 +19,158 @@ const ManageVehicles = () => {
     }, []);
 
     const fetchVehicles = async () => {
-        try {
-            const response = await axios.get('http://localhost:5000/api/vehicles'); // API endpoint to fetch vehicles
-            setVehicles(response.data);
-        } catch (error) {
-            console.error('Error fetching vehicles:', error);
-        }
-    };
 
-    const fetchUsers = async () => {
-        try {
-            const response = await axios.get('http://localhost:5000/api/auth/users');
-            setOwners(response.data);
-        } catch (error) {
-            console.error('Error fetching users:', error);
-        }
-    };
+    try {
 
-    const handleOpen = () => {
-        setIsEditing(false);
-        setFormData({ owner_id: '', vehicle_number: '', model: '', color: '', rfid_tag: '' });
-        setOpen(true);
-    };
+        const response = await axios.get(
+            `${process.env.REACT_APP_API_URL}/api/vehicles`
+        );
 
-    const handleClose = () => {
-        setOpen(false);
-    };
+        setVehicles(response.data);
 
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData((prev) => ({ ...prev, [name]: value }));
-    };
+    } catch (error) {
+        console.error('Error fetching vehicles:', error);
+    }
+};
 
-    const handleSubmit = async () => {
-        try {
-            if (isEditing) {
-                // Update vehicle
-                await axios.put(`http://localhost:5000/api/vehicles/${editVehicleId}`, formData);
-            } else {
-                if(formData.owner_id===''){
-                    alert('owner id is required');
-                    return;
-                }
-                if (!namePattern.test(formData.name)){
-                    alert ('name can only contain letters and spaces.');
-                    return;
-                }
-                if(formData.vehicle_number===''){
-                    alert('vehicle number is required');
-                    return;
-                }
-                if(formData.model===''){
-                    alert('model is required');
-                    return;
-                }
-                if(formData.color===''){
-                    alert('color is required');
-                    return;
-                }
-                if(formData.rfid_tag===''){
-                    alert('rfid tag is required');
-                    return;
-                }
-                // Add new vehicle
-                await axios.post('http://localhost:5000/api/vehicles', formData);
+const fetchUsers = async () => {
+
+    try {
+
+        const response = await axios.get(
+            `${process.env.REACT_APP_API_URL}/api/auth/users`
+        );
+
+        setOwners(response.data);
+
+    } catch (error) {
+        console.error('Error fetching users:', error);
+    }
+};
+
+const handleOpen = () => {
+
+    setIsEditing(false);
+
+    setFormData({
+        owner_id: '',
+        vehicle_number: '',
+        model: '',
+        color: '',
+        rfid_tag: ''
+    });
+
+    setOpen(true);
+};
+
+const handleClose = () => {
+    setOpen(false);
+};
+
+const handleChange = (e) => {
+
+    const { name, value } = e.target;
+
+    setFormData((prev) => ({
+        ...prev,
+        [name]: value
+    }));
+};
+
+const handleSubmit = async () => {
+
+    try {
+
+        if (isEditing) {
+
+            // Update vehicle
+            await axios.put(
+                `${process.env.REACT_APP_API_URL}/api/vehicles/${editVehicleId}`,
+                formData
+            );
+
+        } else {
+
+            if (formData.owner_id === '') {
+                alert('owner id is required');
+                return;
             }
-            fetchVehicles();
-            handleClose();
-        } catch (error) {
-            console.error('Error saving vehicle:', error);
-        }
-    };
 
-    const handleEdit = (vehicle_id) => {
-        const vehicle = vehicles.find((vehicle) => vehicle.vehicle_id === vehicle_id);
-        setFormData({ owner_id: vehicle.owner_id, vehicle_number: vehicle.vehicle_number, model: vehicle.model, color: vehicle.color, rfid_tag: vehicle.rfid_tag });
-        setEditVehicleId(vehicle_id);
-        setIsEditing(true);
-        setOpen(true);
-    };
+            if (!namePattern.test(formData.name)) {
+                alert(
+                    'name can only contain letters and spaces.'
+                );
+                return;
+            }
 
-    const handleDelete = async (vehicle_id) => {
-        try {
-            await axios.delete(`http://localhost:5000/api/vehicles/${vehicle_id}`);
-            fetchVehicles();
-        } catch (error) {
-            console.error('Error deleting vehicle:', error);
+            if (formData.vehicle_number === '') {
+                alert('vehicle number is required');
+                return;
+            }
+
+            if (formData.model === '') {
+                alert('model is required');
+                return;
+            }
+
+            if (formData.color === '') {
+                alert('color is required');
+                return;
+            }
+
+            if (formData.rfid_tag === '') {
+                alert('rfid tag is required');
+                return;
+            }
+
+            // Add new vehicle
+            await axios.post(
+                `${process.env.REACT_APP_API_URL}/api/vehicles`,
+                formData
+            );
         }
-    };
+
+        fetchVehicles();
+        handleClose();
+
+    } catch (error) {
+        console.error('Error saving vehicle:', error);
+    }
+};
+
+const handleEdit = (vehicle_id) => {
+
+    const vehicle = vehicles.find(
+        (vehicle) => vehicle.vehicle_id === vehicle_id
+    );
+
+    setFormData({
+        owner_id: vehicle.owner_id,
+        vehicle_number: vehicle.vehicle_number,
+        model: vehicle.model,
+        color: vehicle.color,
+        rfid_tag: vehicle.rfid_tag
+    });
+
+    setEditVehicleId(vehicle_id);
+    setIsEditing(true);
+    setOpen(true);
+};
+
+const handleDelete = async (vehicle_id) => {
+
+    try {
+
+        await axios.delete(
+            `${process.env.REACT_APP_API_URL}/api/vehicles/${vehicle_id}`
+        );
+
+        fetchVehicles();
+
+    } catch (error) {
+        console.error('Error deleting vehicle:', error);
+    }
+};
 
     const columns = [
         { field: 'vehicle_id', headerName: 'ID', width: 90 },

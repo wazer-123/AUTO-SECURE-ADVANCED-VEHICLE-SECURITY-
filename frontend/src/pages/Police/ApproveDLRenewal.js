@@ -12,33 +12,69 @@ function ApproveDLRenewal() {
         fetchRenewals();
     }, []);
     
-    const fetchRenewals = () => {
-        setLoading(true);
-        axios
-            .get("http://localhost:5000/api/renewal")
-            .then((response) => {
-                setRenewals(response.data);
-                setLoading(false);
-            })
-            .catch((error) => {
-                console.error("Error fetching renewal applications!", error);
-                setError("Failed to load renewal applications");
-                setLoading(false);
-            });
-    };
-    
-    const handleStatusUpdate = (renewalId, newStatus) => {
-        axios
-            .put(`http://localhost:5000/api/renewal/${renewalId}`, { status: newStatus })
-            .then(() => {
-                alert(`Renewal application ${newStatus.toLowerCase()}`);
-                fetchRenewals(); // Refresh the list
-            })
-            .catch((error) => {
-                console.error("Error updating renewal status!", error);
-                alert("Failed to update renewal status");
-            });
-    };
+   const fetchRenewals = () => {
+
+    setLoading(true);
+
+    axios
+        .get(
+            `${process.env.REACT_APP_API_URL}/api/renewal`
+        )
+
+        .then((response) => {
+
+            setRenewals(response.data);
+            setLoading(false);
+
+        })
+
+        .catch((error) => {
+
+            console.error(
+                "Error fetching renewal applications!",
+                error
+            );
+
+            setError(
+                "Failed to load renewal applications"
+            );
+
+            setLoading(false);
+        });
+};
+
+const handleStatusUpdate = (
+    renewalId,
+    newStatus
+) => {
+
+    axios
+        .put(
+            `${process.env.REACT_APP_API_URL}/api/renewal/${renewalId}`,
+            { status: newStatus }
+        )
+
+        .then(() => {
+
+            alert(
+                `Renewal application ${newStatus.toLowerCase()}`
+            );
+
+            fetchRenewals(); // Refresh the list
+        })
+
+        .catch((error) => {
+
+            console.error(
+                "Error updating renewal status!",
+                error
+            );
+
+            alert(
+                "Failed to update renewal status"
+            );
+        });
+};
     
     const formatDate = (dateString) => {
         if (!dateString) return "N/A";

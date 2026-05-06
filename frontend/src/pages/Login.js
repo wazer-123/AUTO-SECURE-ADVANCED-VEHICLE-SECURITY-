@@ -8,30 +8,37 @@ function Login() {
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
-    e.preventDefault();
-    try {
-      const response = await axios.post('http://localhost:5000/api/auth/login', { email, password });
-      const { user_id, role, name } = response.data;
-      localStorage.setItem('user_id', user_id);
-      localStorage.setItem('name', name);
-      localStorage.setItem('userToken', response.data.token);
-      
-      console.log(user_id, name);
-      
-      // Redirect based on role
-      if (role === 'Admin') {
-        navigate('/AdminDash');
-      } else if (role === 'Police') {
-        navigate('/PoliceDash');
-      } else if (role === 'Staff') {
-        navigate('/Home');
-      } else {
-        alert('Role not recognized');
-      }
-    } catch (error) {
-      alert('Invalid credentials');
+  e.preventDefault();
+
+  try {
+    const response = await axios.post(
+      `${process.env.REACT_APP_API_URL}/api/auth/login`,
+      { email, password }
+    );
+
+    const { user_id, role, name } = response.data;
+
+    localStorage.setItem('user_id', user_id);
+    localStorage.setItem('name', name);
+    localStorage.setItem('userToken', response.data.token);
+
+    console.log(user_id, name);
+
+    // Redirect based on role
+    if (role === 'Admin') {
+      navigate('/AdminDash');
+    } else if (role === 'Police') {
+      navigate('/PoliceDash');
+    } else if (role === 'Staff') {
+      navigate('/Home');
+    } else {
+      alert('Role not recognized');
     }
-  };
+
+  } catch (error) {
+    alert('Invalid credentials');
+  }
+};
 
   return (
     <div className="container-fluid p-0">

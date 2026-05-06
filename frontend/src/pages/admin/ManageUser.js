@@ -17,13 +17,18 @@ const ManageUsers = () => {
   }, []);
 
   const fetchUsers = async () => {
-    try {
-      const response = await axios.get('http://localhost:5000/api/auth/users'); // API endpoint to fetch users
-      setUsers(response.data);
-    } catch (error) {
-      console.error('Error fetching users:', error);
-    }
-  };
+  try {
+
+    const response = await axios.get(
+      `${process.env.REACT_APP_API_URL}/api/auth/users`
+    );
+
+    setUsers(response.data);
+
+  } catch (error) {
+    console.error('Error fetching users:', error);
+  }
+};
   const handleOpen = () => {
     setIsEditing(false);
     setFormData({ name: '', email: '', password: '', role: 'Staff' });
@@ -66,26 +71,41 @@ const ManageUsers = () => {
   };
 
   const handleSubmit = async () => {
-    try {
-      if (isEditing) {
-        if (!validateForm()) {
-          return;
-        }
-        // Update user
-        await axios.put(`http://localhost:5000/api/auth/users/${editUserId}`, formData);
-      } else {
-        if (!validateForm()) {
-          return;
-        }
-        // Add new user
-        await axios.post('http://localhost:5000/api/auth/register', formData);
+
+  try {
+
+    if (isEditing) {
+
+      if (!validateForm()) {
+        return;
       }
-      fetchUsers();
-      handleClose();
-    } catch (error) {
-      console.error('Error saving user:', error);
+
+      // Update user
+      await axios.put(
+        `${process.env.REACT_APP_API_URL}/api/auth/users/${editUserId}`,
+        formData
+      );
+
+    } else {
+
+      if (!validateForm()) {
+        return;
+      }
+
+      // Add new user
+      await axios.post(
+        `${process.env.REACT_APP_API_URL}/api/auth/register`,
+        formData
+      );
     }
-  };
+
+    fetchUsers();
+    handleClose();
+
+  } catch (error) {
+    console.error('Error saving user:', error);
+  }
+};
 
   const handleEdit = (user_id) => {
     const user = users.find((user) => user.user_id === user_id);
@@ -96,13 +116,19 @@ const ManageUsers = () => {
   };
 
   const handleDelete = async (user_id) => {
-    try {
-      await axios.delete(`http://localhost:5000/api/auth/users/${user_id}`);
-      fetchUsers();
-    } catch (error) {
-      console.error('Error deleting user:', error);
-    }
-  };
+
+  try {
+
+    await axios.delete(
+      `${process.env.REACT_APP_API_URL}/api/auth/users/${user_id}`
+    );
+
+    fetchUsers();
+
+  } catch (error) {
+    console.error('Error deleting user:', error);
+  }
+};
 
   const columns = [
     { field: 'user_id', headerName: 'ID', width: 90 },

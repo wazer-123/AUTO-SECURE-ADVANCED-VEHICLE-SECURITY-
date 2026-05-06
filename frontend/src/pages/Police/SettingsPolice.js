@@ -32,12 +32,16 @@ const SettingsPolice = () => {
       return;
     }
 
-    try {
-      const response = await axios.post('http://localhost:5000/api/auth/change-password-police', {
-        currentPassword,
-        newPassword,
-        userId,
-      });
+   try {
+
+  const response = await axios.post(
+    `${process.env.REACT_APP_API_URL}/api/auth/change-password-police`,
+    {
+      currentPassword,
+      newPassword,
+      userId,
+    }
+  );
 
       if (response.data.success) {
         setSuccessMessage('Password changed successfully!');

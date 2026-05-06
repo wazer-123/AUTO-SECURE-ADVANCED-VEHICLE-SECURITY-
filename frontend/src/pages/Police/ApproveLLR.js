@@ -39,117 +39,215 @@ function ApproveLLR() {
     calculateAmount();
   }, [selectedVariants]);
 
-  const fetchPendingLLRs = async () => {
-    setLoading(true);
-    try {
-      const response = await axios.get("http://localhost:5000/api/llr/status/pending");
-      setPendingLLRs(response.data);
-    } catch (error) {
-      console.error("Error fetching pending LLRs:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+ const fetchPendingLLRs = async () => {
 
-  const handleLLRSelect = (llr) => {
-    setSelectedLLR(llr);
-    setSelectedVariants([]);
+  setLoading(true);
+
+  try {
+
+    const response = await axios.get(
+      `${process.env.REACT_APP_API_URL}/api/llr/status/pending`
+    );
+
+    setPendingLLRs(response.data);
+
+  } catch (error) {
+
+    console.error(
+      "Error fetching pending LLRs:",
+      error
+    );
+
+  } finally {
+
+    setLoading(false);
+  }
+};
+
+const handleLLRSelect = (llr) => {
+
+  setSelectedLLR(llr);
+  setSelectedVariants([]);
+  setAmount(0);
+  setPaymentStatus("pending");
+};
+
+const handleVariantToggle = (variantId) => {
+
+  if (selectedVariants.includes(variantId)) {
+
+    setSelectedVariants(
+      selectedVariants.filter(id => id !== variantId)
+    );
+
+  } else {
+
+    setSelectedVariants([
+      ...selectedVariants,
+      variantId
+    ]);
+  }
+};
+
+const selectAllVariants = () => {
+
+  const allVariantIds = variants.map(
+    (variant) => variant.id
+  );
+
+  setSelectedVariants(allVariantIds);
+};
+
+const calculateAmount = () => {
+
+  if (selectedVariants.length === 0) {
     setAmount(0);
-    setPaymentStatus("pending");
-  };
+    return;
+  }
 
-  const handleVariantToggle = (variantId) => {
-    if (selectedVariants.includes(variantId)) {
-      setSelectedVariants(selectedVariants.filter(id => id !== variantId));
-    } else {
-      setSelectedVariants([...selectedVariants, variantId]);
-    }
-  };
+  // If all variants are selected
+  if (selectedVariants.length === variants.length) {
+    setAmount(4000);
+    return;
+  }
 
-  const selectAllVariants = () => {
-    const allVariantIds = variants.map(variant => variant.id);
-    setSelectedVariants(allVariantIds);
-  };
+  // Calculate selected variants amount
+  const total = selectedVariants.reduce(
+    (sum, variantId) => {
 
-  const calculateAmount = () => {
-    if (selectedVariants.length === 0) {
-      setAmount(0);
-      return;
-    }
+      const variant = variants.find(
+        v => v.id === variantId
+      );
 
-    // If all variants are selected, charge the "all variants" price
-    if (selectedVariants.length === variants.length) {
-      setAmount(4000);
-      return;
-    }
-
-    // Otherwise calculate based on selected variants
-    const total = selectedVariants.reduce((sum, variantId) => {
-      const variant = variants.find(v => v.id === variantId);
       return sum + (variant ? variant.fee : 0);
-    }, 0);
 
-    setAmount(total);
-  };
+    }, 0
+  );
 
-  const handleApprove = async () => {
-    if (!selectedLLR || selectedVariants.length === 0) {
-      alert("Please select an LLR application and at least one vehicle variant");
-      return;
-    }
+  setAmount(total);
+};
 
-    try {
-      // 1. Update LLR status to approved
-      await axios.put(`http://localhost:5000/api/llr/${selectedLLR.LLR_id}`, {
+const handleApprove = async () => {
+
+  if (
+    !selectedLLR ||
+    selectedVariants.length === 0
+  ) {
+
+    alert(
+      "Please select an LLR application and at least one vehicle variant"
+    );
+
+    return;
+  }
+
+  try {
+
+    // Update LLR status
+    await axios.put(
+      `${process.env.REACT_APP_API_URL}/api/llr/${selectedLLR.LLR_id}`,
+      {
         ...selectedLLR,
         status: "approved"
-      });
+      }
+    );
 
-      // 2. Create new DL record
-      const dlData = {
-        dl_no: dlNumber,
-        user_id: selectedLLR.user_id,
-        llr_id: selectedLLR.LLR_id,
-        issue_date: new Date().toISOString().split('T')[0],
-        expiry_date: new Date(new Date().setFullYear(new Date().getFullYear() + 20)).toISOString().split('T')[0],
-        variants: selectedVariants.map(id => variants.find(v => v.id === id).code).join(','),
-        amount: amount,
-        payment_status: paymentStatus
-      };
+    // Create DL record
+    const dlData = {
 
-      await axios.post("http://localhost:5000/api/dl", dlData);
-      
-      alert("LLR approved and DL generated successfully!");
-      setSelectedLLR(null);
-      setSelectedVariants([]);
-      setAmount(0);
-      fetchPendingLLRs();
-    } catch (error) {
-      console.error("Error approving LLR:", error);
-      alert("Error approving LLR. Please try again.");
-    }
-  };
+      dl_no: dlNumber,
+      user_id: selectedLLR.user_id,
+      llr_id: selectedLLR.LLR_id,
 
-  const handleReject = async () => {
-    if (!selectedLLR) {
-      alert("Please select an LLR application");
-      return;
-    }
+      issue_date: new Date()
+        .toISOString()
+        .split('T')[0],
 
-    try {
-      await axios.put(`http://localhost:5000/api/llr/${selectedLLR.LLR_id}`, {
+      expiry_date: new Date(
+        new Date().setFullYear(
+          new Date().getFullYear() + 20
+        )
+      )
+        .toISOString()
+        .split('T')[0],
+
+      variants: selectedVariants
+        .map(
+          id => variants.find(v => v.id === id).code
+        )
+        .join(','),
+
+      amount: amount,
+      payment_status: paymentStatus
+    };
+
+    await axios.post(
+      `${process.env.REACT_APP_API_URL}/api/dl`,
+      dlData
+    );
+
+    alert(
+      "LLR approved and DL generated successfully!"
+    );
+
+    setSelectedLLR(null);
+    setSelectedVariants([]);
+    setAmount(0);
+
+    fetchPendingLLRs();
+
+  } catch (error) {
+
+    console.error(
+      "Error approving LLR:",
+      error
+    );
+
+    alert(
+      "Error approving LLR. Please try again."
+    );
+  }
+};
+
+const handleReject = async () => {
+
+  if (!selectedLLR) {
+
+    alert(
+      "Please select an LLR application"
+    );
+
+    return;
+  }
+
+  try {
+
+    await axios.put(
+      `${process.env.REACT_APP_API_URL}/api/llr/${selectedLLR.LLR_id}`,
+      {
         ...selectedLLR,
         status: "rejected"
-      });
-      
-      alert("LLR application rejected!");
-      setSelectedLLR(null);
-      fetchPendingLLRs();
-    } catch (error) {
-      console.error("Error rejecting LLR:", error);
-      alert("Error rejecting LLR. Please try again.");
-    }
-  };
+      }
+    );
+
+    alert("LLR application rejected!");
+
+    setSelectedLLR(null);
+
+    fetchPendingLLRs();
+
+  } catch (error) {
+
+    console.error(
+      "Error rejecting LLR:",
+      error
+    );
+
+    alert(
+      "Error rejecting LLR. Please try again."
+    );
+  }
+};
 
   const filteredLLRs = pendingLLRs.filter(llr => {
     return llr.llr_no.toLowerCase().includes(searchTerm.toLowerCase()) ||
