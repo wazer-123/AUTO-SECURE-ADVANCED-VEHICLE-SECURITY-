@@ -28,6 +28,7 @@ import ApproveDLRenewal from './pages/Police/ApproveDLRenewal';
 import SettingsUser from './pages/staff/SettingsUser';
 import SettingsPolice from './pages/Police/SettingsPolice';
 import About from './pages/staff/About';
+import UploadImage from "./pages/UploadImage";
 function App() {
     const userRole = 'admin';
     const isAuthenticated = true; 
@@ -37,6 +38,7 @@ function App() {
             <Routes>
                 <Route path="/" element={<Login />} />
                 <Route path="/Register" element={<Register />} />
+                <Route path="/upload" element={<UploadImage />} />
                 <Route path="/Forgot-Password" element={<ForgotPassword />} />
 
                 <Route path="/admin/manage-user" element={<ManageUsers />} />
