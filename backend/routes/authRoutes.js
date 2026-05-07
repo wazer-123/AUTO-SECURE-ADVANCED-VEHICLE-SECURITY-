@@ -1,21 +1,35 @@
 const express = require('express');
 const db = require('../db');
 const router = express.Router();
+const bcrypt = require('bcryptjs');
 
 // Register
 router.post('/register', (req, res) => {
   let { name, email, password, role } = req.body;
 
-  
   if (!role) {
-    role = "Staff";  // or "user" (your choice)
+    role = "Staff";
   }
 
-  const sql = 'INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)';
+  // Check if email already exists
+  const checkSql = 'SELECT * FROM users WHERE email = ?';
 
-  db.query(sql, [name, email, password, role], (err, result) => {
+  db.query(checkSql, [email], (err, result) => {
+
     if (err) return res.status(500).send(err);
-    res.send('Registration successful');
+
+    if (result.length > 0) {
+      return res.status(400).json({ message: 'Email already exists' });
+    }
+
+    const sql = 'INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)';
+
+    db.query(sql, [name, email, password, role], (err, result) => {
+
+      if (err) return res.status(500).send(err);
+
+      res.send('Registration successful');
+    });
   });
 });
 
